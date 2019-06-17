@@ -1,0 +1,66 @@
+---
+title: "Calvino Engine"
+output:
+  html_document:
+    df_print: paged
+---
+The goal of this notebook is to demonstrate some ideas about CRQA and RQA, (Cross)Recurrence Quantification Analysis for text data. A few examples, will be analyzed with these tools in R to uncover structural patterns in writing and conversation. Also, this is an [R Markdown](http://rmarkdown.rstudio.com) Notebook, which runs some code I've written in chunks and shows the results beneath it.
+
+It works like this: execute the code chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+word <- c("If", "on", "a", "winter's", "night", "a", "traveler")
+numb <- 1:7
+plot(numb,numb,axes = FALSE, xlab ="",ylab = "")
+axis(1,numb, word, las = 2,tick = -.01)
+axis(2,numb, word, las = 2,tick = -.01)
+```
+Two things happened here - we made the title of Italo Calvino's If on a Winter's Night a Traveler seven separate strings, identified each word as a number (by count, not code) and then plotted "matches" as points along the x and y axis.  Since the phrase doesnt repeat words, there's points down the middle, a line where every word matches itself. 
+
+Let's try another line of text, from later in the poetic stanza that comprises Calvino's chapter titles for this book.
+
+With these two lines, there isn't a match for the seventh word, (enlace =/= intersect) take a look at the code and guess how that will turn out.
+```{r}
+line1 <- unlist(strsplit("in a network of lines that enlace",split = " "))
+line2 <- unlist(strsplit("in a network of lines that intersect",split = " "))
+numb <- 1:7
+matches <- logical(7)
+for (n in numbs) { matches[n] = strcmp(line1[n],line2[n]) }
+plot(numb[matches],numb[matches],xlim = c(1,7), ylim = c(1,7), axes = FALSE, xlab ="",ylab = "")
+axis(1,numb, line1, las = 2,tick = -.01)
+axis(2,numb, line2, las = 2,tick = -.01)
+```
+Right, no circle for the last words. The code above adds in one important step within the for loop; comparing words and outputting a TRUE or FALSE match. When this TRUE/FALSE list is then paired to the numbers 1-7 only numbers 'match' are plotted.
+
+So we've compared ordered words in one line to themselves, and ordered words of one line to another. This will only tell us about matches where both word and position is the same. This is somewhat useful, but words in a poem could recur in more ways than just that.
+Let's now look at the whole stanza, and look for recurrence throughout the poem. 
+```{r}
+poem <- "If on a winter's night a traveler Outside the town of Malbork Leaning from the steep slope Without fear of wind or vertigo Looks down in the gathering shadow In a network of lines that enlace In a network of lines that intersect On the carpet of leaves illuminated by the moon Around an empty grave What story down there awaits its end"
+poem_unlist <- unlist(strsplit(poem," "))
+match_matrix <- spMatrix(64,64)
+numbs <- 1:length(poem_unlist)
+for (i in numbs) { 
+  for (j in numbs) {
+    match_matrix[i,j] <-strcmp(poem_unlist[i],poem_unlist[j])
+  }
+}
+image(match_matrix)
+```
+
+Wow! So there is definitely more recurrence than just along that middle line. (Don't be thrown off that this is plotted in a different 'direction' than our other plots, it's still the same information!)  Note: we used a sparse matrix in the code above.
+  Okay! Now that we have a decent example of recurrence, what observations can be drawn from this plot? First off, there's a line down the middle where everything matches and it looks points are reflected across that line.  We can also pick out one of our earlier plots; "in a network of..." right around the middle of this one. Aside from the middle "line of recurrence" those 6 words create the maximum sequential recurrence in the plot; the "MAXline" if you will. Additionally, we could evaluate how many points are recurrent, versus how many are not, a ratio of the shaded points to the blank points.
+  
+We've quickly scaled up our visual idea of text based recurrence, so now we can jump into an R package specifically designed for this; crqanlp - or cross recurrence quantification analysis for natural language processing.  Concise, right? In this package is a command called textrqa, lets try it out on the following paragraph, also from Calvino's book. 
+
+```{r}
+library(crqanlp)
+text <- "She explained to me that a suitably programmed computer can read a novel in a few minutes and record the list of all the words contained in the text, in order of frequency. That way I can have an already completed reading at hand, Lotaria says, with an incalculable saving of time. What is the reading of a text, in fact, except the recording of certain thematic recurrences, certain insistences of forms and meanings? An electronic reading supplies me with a list of the frequencies, which I have only to glance at to form an idea of the problems the book suggests to my critical study. Naturally, at the highest frequencies the list records countless articles, pronouns, particles, but I don't pay them any attention. I head straight for the words richest in meaning; they can give me a fairly precise notion of the book"
+
+results <- text_rqa(rsrc = text, typ = "string", removeStopwords = F, embed = 1)
+plot_rp(results$RP,cex=.2)
+```
+
+
+Add a new chunk: *Cmd+Option+I*.
+click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
