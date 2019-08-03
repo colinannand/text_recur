@@ -1,0 +1,74 @@
+---
+title: "Zipfs_Law"
+author: "Colin T. Annand"
+date: "8/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Zipfs Law in the Switchboard Corpus
+
+The Switchboard 1 - R2 dataset contains over 260 hours of two way telephone conversations.  These conversations were transcribed, and word counts and frequencies compiled. In many large language corpuses a relationship between word rank and frequency emerges, called Zipf's Law (George Kingsley Zipf).  Let's see if we can find it here, just from the transcription word counts:
+
+```{r}
+library(data.table)
+word_stats <- fread("word_statistics_062598.text",skip = 10,header = FALSE) #word stats file
+col <- c("word","count","pdf%","drop1","cumulative_count","drop2","cdf%")
+colnames(word_stats) <- col
+rank <- 1:length(word_stats$word) #1 through 6000
+
+plot(rank,word_stats$count) #this is our first simple attempt at finding Zipf's law, a plot of the word ranks versus the counts. To the trained eye, this probably looks like a power law, an exponential relationship between the two variables. An easier way to see this is on a log-log plot (where the scale of the axses is also exponential) therefore the relationship is displayed as a straight line.
+plot(rank,word_stats$count, log="xy", main = "Switchboard Corpus Transcribed 'Words'", xlab = "(log) Word Rank", ylab = "(log) Word Frequency")
+
+```
+Looks like there is a nonlinear relationship here. (linear when plotted on log/log axes). Zipf's law is the relationship between rank and frequency, and can be calculated with a regression of one onto the other. 
+```{r}
+x <- log(rank)
+y <- log(word_stats$count)
+
+#word_stats <- data.frame(word_stats,rank)
+
+regress <- lm(log(word_stats$rank) ~ log(word_stats$count))
+summary(regress)
+# plot(regress$fitted.values,regress$residuals) #Definitely a problem at the low end...
+plot(log(word_stats$rank),log(word_stats$count)) +
+abline(regress,untf = F,col = "red")
+```
+
+There's our attempt at a straightforward linear fit. It looks like the low ranks (items stated only one time) may be problematic. These should be examined in the data, lets look at the last 20.
+```{r}
+tail(word_stats$word,20)
+```
+In the transcription, when phonemes can't be distinguished, an assumed phoneme is bracketed. Looking at numbers 2."you", 19."and", we know these item counts should likely be collapsed into their higher ranked correct items, which are the 4th and 2nd ranked, respectively:
+```{r}
+head(word_stats$word,20)
+```
+There's a way to do this with replacement commands... but for the moment, let's leave these in, after all - errors and mispronunciation are a natural part of speech, just like word fillers or non-speech events (notice "uh" is ranked 5th, and [laughter] 20th). This means we are looking for a natural form of relative rates of speech events, words & non-words alike. 
+
+Since we don't want to cut out the low rank outliers, we can instead examine a polynomial relationship, so let's try that model:
+
+```{r}
+nonlinear <- lm(x ~ poly(y,5)) #x is rank, y is count with an orthogonal 3rd order polynomial; which seems likely from the plot.
+summary(nonlinear)
+# significant model, with a high R squared, and although this is overkill for the example, the model & residuals should be checked for significant outliers.
+#plot(nonlinear$fitted.values,nonlinear$residuals) #this is still going to look the same as the previous plot...
+pred.values <- data.frame(x = x, y = y)
+pred.values$newY <- predict(nonlinear, preddd = pred.values,level = .99)
+plot(x,y)+
+  lines(y,predicted.freq[,1], col="red")+
+  lines(y,predicted.freq[,2], col="blue")
+```
+
+#### Doing some stuff with fitting power-laws
+```{r}
+switch_pl <- displ$new(word_stats$count) #displ object - class = discrete distribution
+est = estimate_xmin(switch_pl) #lower threshold power_law estimate
+
+#bootstrap to estimate legitimacy of powerlaw distribution
+bs_p = bootstrap(switch_pl) #takes 2 mins on 1 core
+bs_p$p  # point estimate p value
+plot(bs_p) # plot with 95% Confidence Intervals
+```
