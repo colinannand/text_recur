@@ -2,7 +2,9 @@
 title: "Zipfs_Law"
 author: "Colin T. Annand"
 date: "8/1/2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -62,13 +64,36 @@ plot(x,y)+
   lines(y,predicted.freq[,2], col="blue")
 ```
 
-#### Doing some stuff with fitting power-laws
+#### Fitting power-laws, following the conventions outlines in Colin S. Gillespie's poweRlaw() package.
+
 ```{r}
 switch_pl <- displ$new(word_stats$count) #displ object - class = discrete distribution
-est = estimate_xmin(switch_pl) #lower threshold power_law estimate
+est <- estimate_xmin(switch_pl) #lower threshold power_law estimate
+switch_pl$setXmin(est)
+
+#log normal
+switch_ln <- dislnorm$new(word_stats$count)
+est_ln <- estimate_xmin(switch_ln)
+switch_ln$setXmin(est_ln)
+#Poisson
+switch_ps <- dispois$new(word_stats$count)
+est_ps <- estimate_xmin(switch_ps)
+switch_ps$setXmin(est_ps)
+
+plot(switch_pl)+
+  lines(switch_pl, col=2)+
+  lines(switch_ln, col=3)+
+  lines(switch_ps, col=4)
+
+
 
 #bootstrap to estimate legitimacy of powerlaw distribution
-bs_p = bootstrap(switch_pl) #takes 2 mins on 1 core
+bs_p <- bootstrap(switch_pl) #takes 2 mins on 1 core
+
 bs_p$p  # point estimate p value
+
 plot(bs_p) # plot with 95% Confidence Intervals
+
+par(mar=c(3,3,2,1), mgp=c(2, 0.4, 0), tck = -.01, cex.acis = 0.9, las = 1)
+plot(switch_pl, pch = 21, bg = 2, panel.first=grid(col = "grey80"),xlab = "Word Rank", ylab="CDF")
 ```
