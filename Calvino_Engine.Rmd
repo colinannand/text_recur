@@ -25,7 +25,7 @@ line1 <- unlist(strsplit("in a network of lines that enlace",split = " "))
 line2 <- unlist(strsplit("in a network of lines that intersect",split = " "))
 numb <- 1:7
 matches <- logical(7)
-for (n in numbs) { matches[n] = strcmp(line1[n],line2[n]) }
+for (n in numb) { matches[n] = strcmp(line1[n],line2[n]) }
 plot(numb[matches],numb[matches],xlim = c(1,7), ylim = c(1,7), axes = FALSE, xlab ="",ylab = "")
 axis(1,numb, line1, las = 2,tick = -.01)
 axis(2,numb, line2, las = 2,tick = -.01)
@@ -60,7 +60,11 @@ results <- text_rqa(rsrc = text, typ = "string", removeStopwords = F, embed = 1)
 plot_rp(results$RP,cex=.2)
 ```
 
+In the paragraph above, Lotaria is describing some general natural langage processing methods - making frequency lists, looking at which words reoccur and how often.  I wonder what she would think of text recurrence? Perhaps, just by looking at recurrence you could pick out different literary forms? 
 
+```{r}
+library(pdftools)
+```
 Add a new chunk: *Cmd+Option+I*.
 click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
 Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

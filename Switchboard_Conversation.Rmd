@@ -1,0 +1,53 @@
+---
+title: "Switchboard_Conversation"
+output: html_notebook
+---
+This R markdown notebook is intended to give a preview of the methods used for my dissertation analysis.  For a more conceptual explanation of the analyses themselves, I have created some other R notebook tutorials, which you can read here:
+Calvino Engine (Recurrence Analysis)
+Fractal Fixation (Fractal Analysis)
+
+The following analysis looks word level recurrence in one conversation, between Speaker A, and Speaker B. 
+
+Code can be 'run' (or just the results displayed) by going into a code chunk like the one below and pressing *Cmd+Shift+Enter*, or pressing the Run button (green arrow) at the top of the code section.
+
+```{r}
+library(data.table)
+spkA <- fread("sw2001A-ms98-a-word.text")  #Read in the speaker transcripts
+spkB <- fread("sw2001B-ms98-a-word.text")  #1)Speaker  2) Word onset 3)Word offset 4)Word
+columns <- c("file","onset","offset","word")
+colnames(spkA) <- columns 
+colnames(spkB) <- columns
+
+wordsA <- spkA$word #Select just the words
+wordsB <- spkB$word
+```
+
+
+Below is a quick look at what categorical Cross Recurrence Quantification Analysis does: make a matrix for every possible comparison between two series of items.  In this case, wherever words are reused, the sparse matrix takes a value of TRUE, and these values of TRUE are then plotted. 
+
+```{r}
+library(Matrix)
+library(pracma)
+
+A_no <- 1:length(wordsA) #number of words from Speaker A
+B_no <- 1:length(wordsB) #number of words from Speaker B
+match_matrix <- spMatrix(length(wordsA),length(wordsB))  #create a matrix 
+for (i in A_no) { 
+  for (j in B_no) {
+    match_matrix[i,j] <-strcmp(wordsA[i],wordsB[j]) }  #check for matches
+  }
+
+image(match_matrix)    #plot the matches vs misses.
+
+```
+
+Now we have a view of the matches throughout the conversation.  The ratio of black/white within the plot, is giving us an overall indication of the amount of recurrence. 
+
+Okay, time to compute some statistics using the CRQA packages by Dale, Moreno & Coco.
+
+```{r}
+library(crqanlp)  # auto loads CRQA - Cross Recurrence Quant.
+
+```
+
+Extract all of the 

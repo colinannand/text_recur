@@ -1,0 +1,37 @@
+---
+title: "text_extract"
+author: "Colin T. Annand"
+date: "6/22/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Extraction Routine for CRQA-NLP for Long Distance Call TEXT
+Speakers are ALWAYS marked as A and B, so REGEX string removal of timestamps before those characters can clean
+
+```{r}
+#get file list
+wd <- "/Users/cannand/Desktop/SWITCHBOARD/swb_ms98_transcriptions"
+setwd("/Users/cannand/Desktop/SWITCHBOARD/swb_ms98_transcriptions")
+folders <- list.dirs();  #this gives folders and sub folder structure, each folder has ~40 sub folders with 4 transcrip files each, for ~2400 conversations
+length(folders)  #2469
+
+Transcripts <- data.frame()
+# LOOP: get files into dataframes using textreadr
+for folder in folders {
+  f.path <- paste(wd,folder)
+  output <- read_dir_transcript(path = f.path)
+  Transcripts <- 
+}
+
+#separate into speakers
+gsub(x)
+subset(x)
+
+#Clean timestamps
+cleanB <- str_remove(TextB,".*(?=\\ B)") # or remove antying before colon (?=:)
+cleanB <- str_remove(cleanB,"B:\\ ") #remove B, colon, space
+
+```
